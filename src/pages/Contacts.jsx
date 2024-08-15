@@ -1,5 +1,9 @@
-import React, { useState, useRef } from "react";
-import emailjs from "@emailjs/browser"
+import React, { useState, useRef, Suspense } from "react";
+import emailjs from "@emailjs/browser";
+import { Canvas } from "@react-three/fiber";
+
+import Loader from "../components/Loader";
+import Fox from "../models/Fox";
 
 const Contacts = () => {
   const formRef = useRef(null);
@@ -7,7 +11,7 @@ const Contacts = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
   const handleFocus = () => {};
   const handleBlur = () => {};
@@ -15,28 +19,31 @@ const Contacts = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    emailjs.send(
-      import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
-      {
-        from_name: form.name,
-        to_name:"Addisi Joy",
-        from_email: form.email,
-        to_email: "elooghenejoy@gmail.com",
-        message: form.message
-      },
-      import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY
-    ).then(()=> {
-      setIsLoading(false);
-      //TODO: show success message
-      //TODO: Hide an alert
+    emailjs
+      .send(
+        import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
+        {
+          from_name: form.name,
+          to_name: "Addisi Joy",
+          from_email: form.email,
+          to_email: "elooghenejoy@gmail.com",
+          message: form.message,
+        },
+        import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY
+      )
+      .then(() => {
+        setIsLoading(false);
+        //TODO: show success message
+        //TODO: Hide an alert
 
-      setForm({ name: '', email: '', message: '' });
-    }).catch((error)=> {
-      setIsLoading(false);
-      console.log(error);
-      //TODO: show error message
-    })
+        setForm({ name: "", email: "", message: "" });
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        console.log(error);
+        //TODO: show error message
+      });
   };
 
   return (
@@ -99,6 +106,26 @@ const Contacts = () => {
             {isLoading ? "Sending..." : "Send Message"}
           </button>
         </form>
+        <div className="lg:w-1/2 w-full lg:h-auto md:h-[550px] h-[350px]">
+          <Canvas
+            camera={{
+              position: [0, 0, 5],
+              fov: 75,
+              near: 0.1,
+              far: 1000
+            }}
+          >
+            <directionalLight intensity={2.5} position={[0, 0, 1]} />
+            <ambientLight intensity={0.5} />
+            <Suspense fallback={<Loader />}>
+              <Fox
+                position={[0.5, 0.35, 0]}
+                rotation={[12.6, -0.6, 0]}
+                scale={[0.5, 0.5, 0.5]}
+              />
+            </Suspense>
+          </Canvas>
+        </div>
       </div>
     </section>
   );
